@@ -1,10 +1,13 @@
-welcome: "Welcome to Calculator! Please enter your name:"
-valid_name: "Please enter a valid name."
-# greet: "Hi, #{name}!"
-number_prompt_1: "Please enter the first number:"
-number_prompt_2: "Please enter the second number: "
-valid_num: "That's not a valid number."
-valid_op: "Please choose 1, 2, 3, or 4"
-# result: "The result is #{result}"
-another_calc: "Do you want to perform another calculation? (y to calculate again)"
-goodbye: "Thank you for using the Calculator. Goodbye."
+en:
+  welcome: "Welcome to Calculator! Please enter your name:"
+  valid_name: "Please enter a valid name."
+  number_prompt_1: "Please enter the first number:"
+  number_prompt_2: "Please enter the second number: "
+  valid_num: "That's not a valid number."
+  valid_op: "Please choose 1, 2, 3, or 4"
+  another_calc: "Do you want to perform another calculation? (y to calculate again)"
+  goodbye: "Thank you for using the Calculator. Goodbye."
+es:
+  welcome: "Bienvenido a la calculadora! Entre su nombre:"
+  valid_name: "Asegurese de entrar un nobre valido."
+  
