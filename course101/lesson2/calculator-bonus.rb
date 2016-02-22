@@ -81,7 +81,7 @@ loop do
     3 multiply
     4 divide
   MSG
-  puts operator_prompt
+  puts(operator_prompt)
   operator = ''
   loop do
     operator = Kernel.gets().chomp()
