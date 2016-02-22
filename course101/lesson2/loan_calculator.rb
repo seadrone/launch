@@ -22,12 +22,12 @@ end
 puts "Basic Loan Calculator App"
 
 loop do
-  p = ''
+  principal = ''
   loop do
     puts "Please enter the loan amount:"
-    p = gets.chomp
+    principal = gets.chomp
     
-    if p.empty? || !pos_number?(p)
+    if principal.empty? || !pos_number?(principal)
       puts "Not a valid loan amount. Please try again."
     else
       break
@@ -63,7 +63,7 @@ loop do
   i_monthly = i_annual.to_f / 12 / 100
   n_months = n_years.to_i * 12
   
-  pmt = p.to_f * ((i_monthly * ((1 + i_monthly) ** n_months)) / (((1 + i_monthly) ** n_months) - 1))
+  pmt = principal.to_f * ((i_monthly * ((1 + i_monthly) ** n_months)) / (((1 + i_monthly) ** n_months) - 1))
   
   puts "The monthly payment is #{to_currency(pmt)}."
   
