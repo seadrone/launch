@@ -1,4 +1,10 @@
 VALID_CHOICES = ['rock', 'paper', 'scissors']
+
+def test_method
+end
+
+test_method
+
 def prompt(message)
   puts "=> #{message}"
 end
@@ -31,7 +37,7 @@ loop do
   end
   
   computer_choice = VALID_CHOICES.sample()
-  puts "You chose: #{choice}.\nComputer chose: #{computer_choice}."
+  prompt("You chose: #{choice}. Computer chose: #{computer_choice}.")
   
   display_result(choice, computer_choice)
   
