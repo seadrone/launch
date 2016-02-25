@@ -30,8 +30,6 @@ def operation_to_message(op)
             when '4'
               'Dividing'
           end
-  x = "a random line of code"
-  
   gerund
 end
 
