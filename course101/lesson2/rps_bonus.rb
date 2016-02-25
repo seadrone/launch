@@ -80,7 +80,7 @@ loop do
   
   if score == 'You win!' 
     user_score += 1
-  else score == 'Computer wins!' 
+  elsif score == 'Computer wins!' 
     computer_score += 1
   end
   
