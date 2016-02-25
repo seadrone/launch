@@ -1,4 +1,6 @@
 VALID_CHOICES = %w(rock paper scissors spock lizard)
+user_score = 0
+computer_score = 0
 
 def prompt(message)
   puts "=> #{message}"
@@ -36,13 +38,13 @@ def win?(first, second)
   (first == 'lizard' && ((second == 'paper') || (second == 'spock' )))
 end
 
-def display_result(player, computer)
+def result(player, computer)
   if win?(player, computer)
-    prompt("You win!")
+    "You win!"
   elsif win?(computer, player)
-    prompt("Computer wins!")
+    "Computer wins!"
   else
-    prompt("It's a tie!")
+    "It's a tie!"
   end
 end
 
@@ -74,11 +76,27 @@ loop do
   computer_choice = VALID_CHOICES.sample()
   prompt("You chose: #{choice}. Computer chose: #{computer_choice}.")
 
-  display_result(choice, computer_choice)
+  puts score = result(choice, computer_choice)
   
-  prompt("Do you want to play again?")
-  answer = gets.chomp
-  break unless answer.downcase.start_with?('y')
+  if score == 'You win!' 
+    user_score += 1
+  else score == 'Computer wins!' 
+    computer_score += 1
+  end
+  
+  puts "Your score is: #{user_score}. The computer's score is: #{computer_score}."
+  
+  # prompt("Do you want to play again?")
+  # answer = gets.chomp
+  # break unless answer.downcase.start_with?('y')
+  
+  break if user_score > 4 || computer_score > 4
+  
 end
 
+if user_score > computer_score
+  prompt("Congratulations! You beat the computer.")
+else
+  prompt("The computer wins. Better luck next time.")
+end
 prompt("Thanks for playing. Goodbye!")
