@@ -15,19 +15,18 @@ def find_abbreviations(array)
 end
 
 def abbreviation_to_word(letter)
-  converted_abbreviation =  case letter
-                            when 'r'
-                              'rock'
-                            when 'sc'
-                            'scissors'
-                            when 'p'
-                            'paper'
-                            when 'l'
-                            'lizard'
-                            when 'sp'
-                            'spock'
-                            end
-  converted_abbreviation
+  case letter
+    when 'r'
+      'rock'
+    when 'sc'
+    'scissors'
+    when 'p'
+    'paper'
+    when 'l'
+    'lizard'
+    when 'sp'
+    'spock'
+  end
 end
 
 def win?(first, second)
@@ -38,20 +37,23 @@ def win?(first, second)
   (first == 'lizard' && ((second == 'paper') || (second == 'spock' )))
 end
 
-def result(player, computer)
+def result_text(player, computer)
   if win?(player, computer)
-    "You win!"
+    "You won!"
   elsif win?(computer, player)
-    "Computer wins!"
+    "Computer won!"
   else
     "It's a tie!"
   end
 end
 
+prompt("Welcome to Rock, Paper, Scissors, Spock, Lizard!")
+
 loop do 
   choice = ''
   loop do
-    prompt("Choose one: #{VALID_CHOICES.join(', ')}")
+    prompt("Choose one: #{VALID_CHOICES.join(', ')}. You may abbreviate any choice with its first letter.")
+
     choice = gets.chomp
     
     if VALID_CHOICES.include?(choice) || find_abbreviations(VALID_CHOICES).include?(choice)
@@ -76,19 +78,16 @@ loop do
   computer_choice = VALID_CHOICES.sample()
   prompt("You chose: #{choice}. Computer chose: #{computer_choice}.")
 
-  puts score = result(choice, computer_choice)
+  who_won = result_text(choice, computer_choice)
+  prompt(who_won)
   
-  if score == 'You win!' 
+  if who_won == 'You won!' 
     user_score += 1
-  elsif score == 'Computer wins!' 
+  elsif who_won == 'Computer won!' 
     computer_score += 1
   end
   
-  puts "Your score is: #{user_score}. The computer's score is: #{computer_score}."
-  
-  # prompt("Do you want to play again?")
-  # answer = gets.chomp
-  # break unless answer.downcase.start_with?('y')
+  prompt("Your score is: #{user_score}. The computer's score is: #{computer_score}.")
   
   break if user_score > 4 || computer_score > 4
   
