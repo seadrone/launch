@@ -11,10 +11,8 @@ p flintstones << "Dino" << "Hoppy"
 
 # 4
 advice = "Few things in life are as important as house training your pet dinosaur."
-advice.index("house") # 39
-advice.slice!(39..-1)
-puts advice
-# advice.slice!(0, advice.index('house')) # is this wrong??
+puts advice.slice!(0, advice.index('house')) 
+# puts advice.slice!(advice.index('house'), advice.length)
 # The #slice method is non-destructive. It will not affect the original advice variable
 
 # 5
