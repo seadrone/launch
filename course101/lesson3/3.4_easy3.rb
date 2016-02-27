@@ -18,6 +18,7 @@ puts advice.slice!(0, advice.index('house'))
 # 5
 statement = "The Flintstones Rock!"
 p statement.scan('t').length
+p statement.count('t')
 
 # 6
 title = "Flintstone Family Members"
