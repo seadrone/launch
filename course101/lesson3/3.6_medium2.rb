@@ -39,3 +39,43 @@ puts sentence.chop.split.reverse.join(' ')
 # The output is 34. answer is still 42. new_answer is 50
 
 # 6
+munsters = {
+  "Herman" => { "age" => 32, "gender" => "male" },
+  "Lily" => { "age" => 30, "gender" => "female" },
+  "Grandpa" => { "age" => 402, "gender" => "male" },
+  "Eddie" => { "age" => 10, "gender" => "male" },
+  "Marilyn" => { "age" => 23, "gender" => "female"}
+}
+
+def mess_with_demographics(demo_hash)
+  demo_hash.values.each do |family_member|
+    family_member["age"] += 42
+    family_member["gender"] = "other"
+  end
+end
+
+def copy_hash( input )
+  output = {}
+  input.each do |pair|
+    output.store( pair[0], pair[1].clone() )
+  end
+  return output
+end
+
+munsters_copy = copy_hash(munsters)
+mess_with_demographics(munsters_copy)
+puts munsters
+puts munsters_copy
+
+# 7
+def rps(fist1, fist2)
+  if fist1 == "rock"
+    (fist2 == "paper") ? "paper" : "rock"
+  elsif fist1 == "paper"
+    (fist2 == "scissors") ? "scissors" : "paper"
+  else
+    (fist2 == "rock") ? "rock" : "scissors"
+  end
+end
+
+puts rps(rps(rps("rock", "paper"), rps("rock", "scissors")), "rock")
