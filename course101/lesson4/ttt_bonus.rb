@@ -40,6 +40,7 @@ def empty_squares(brd)
 end
 
 def joinor(arr, punct, word)
+  return arr.join() if arr.size < 2
   last_val = arr.pop
   arr.join("#{punct} ")<< "#{punct} #{word} #{last_val}"
 end
@@ -98,6 +99,7 @@ loop do
   else
     prompt("It's a tie!")
   end
+  
   prompt("Do you want to play again? (y or n)")
   answer = gets.chomp
   break unless answer.downcase.start_with?('y')
