@@ -112,17 +112,19 @@ loop do
   sleep(1.2) unless user_score == NUM_TO_WIN || computer_score == NUM_TO_WIN
 
   if user_score == NUM_TO_WIN
+    prompt("Congratulations!")
+    prompt("The final score is: You: #{user_score} Computer: #{computer_score}")
+    prompt("Do you want to play again? (y or n)")
     user_score = 0
     computer_score = 0
-    prompt("Congratulations!")
-    prompt("Do you want to play again? (y or n)")
     answer = gets.chomp
     break unless answer.downcase.start_with?('y')
   elsif computer_score == NUM_TO_WIN
+    prompt("Bummer, the computer wins.")
+    prompt("The final score is: You: #{user_score} Computer: #{computer_score}")
+    prompt("Do you want to play again? (y or n)")
     user_score = 0
     computer_score = 0
-    prompt("Bummer, the computer wins.")
-    prompt("Do you want to play again? (y or n)")
     answer = gets.chomp
     break unless answer.downcase.start_with?('y')
   end
