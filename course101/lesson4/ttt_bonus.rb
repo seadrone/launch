@@ -4,7 +4,7 @@ INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
 WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 4, 7], [2, 5, 8], [3, 6, 9], [3, 5, 7], [1, 5, 9]]
-NUM_TO_WIN = 2
+NUM_TO_WIN = 5
 
 def prompt(msg)
   puts "=> #{msg}"
@@ -12,6 +12,7 @@ end
 
 def joinor(arr, punct, word)
   return arr.join() if arr.size < 2
+  return arr.join(' or ') if arr.size == 2 
   last_val = arr.pop
   arr.join("#{punct} ")<< "#{punct} #{word} #{last_val}"
 end
@@ -58,13 +59,30 @@ def player_places_piece!(brd)
   brd[square] = PLAYER_MARKER
 end
 
+def detect_third_square(brd, marker)
+ WINNING_LINES.each do |line|
+    if brd.values_at(*line).count(marker) == 2 && brd.values_at(*line).count(' ') == 1
+      action_square = line[brd.values_at(*line).find_index(' ').to_i]
+      return action_square
+    end
+  end
+  nil
+end
+
+def computer_defend!(brd, square)
+ brd[square] = COMPUTER_MARKER
+end
+
+def computer_offense!(brd, square)
+  brd[square] = COMPUTER_MARKER
+end
+
 def computer_places_piece!(brd)
   square = empty_squares(brd).sample
   brd[square] = COMPUTER_MARKER
 end
 
 def board_full?(brd)
-  # return true if empty_squares(brd).length == 0
   empty_squares(brd).empty?
 end
 
@@ -98,7 +116,19 @@ loop do
     prompt("Your score is: #{user_score}. Computer's score is: #{computer_score}.")
     player_places_piece!(board)
     break if someone_won?(board) || board_full?(board)
-    computer_places_piece!(board)
+    
+    offense_square = detect_third_square(board, COMPUTER_MARKER) # computer offensive logic
+    if offense_square 
+      computer_offense!(board, offense_square) 
+    else
+      defense_square = detect_third_square(board, PLAYER_MARKER) # computer defense logic
+      if defense_square
+        computer_defend!(board, defense_square)
+      else
+        computer_places_piece!(board)
+      end
+    end
+
     display_board(board)
     break if someone_won?(board) || board_full?(board)
   end
@@ -109,7 +139,7 @@ loop do
   computer_score += 1 if detect_winner(board) == 'Computer'
 
   display_game_winner(board)
-  sleep(1.2) unless user_score == NUM_TO_WIN || computer_score == NUM_TO_WIN
+  sleep(1.5) unless user_score == NUM_TO_WIN || computer_score == NUM_TO_WIN
 
   if user_score == NUM_TO_WIN
     prompt("Congratulations!")
