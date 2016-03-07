@@ -77,9 +77,21 @@ def computer_offense!(brd, square)
   brd[square] = COMPUTER_MARKER
 end
 
+def check_square_five?(brd)
+  if brd[5] == ' '
+    return true
+  else
+    return false
+  end
+end
+
 def computer_places_piece!(brd)
+  if check_square_five?(brd)
+    brd[5] = COMPUTER_MARKER 
+  else
   square = empty_squares(brd).sample
   brd[square] = COMPUTER_MARKER
+  end
 end
 
 def board_full?(brd)
