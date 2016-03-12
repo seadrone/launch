@@ -1,3 +1,6 @@
+DEALER_STAYS_AT = 27
+WHATEVER_ONE = 31
+
 def prompt(msg)
   puts "=> #{msg}"
 end
@@ -51,14 +54,14 @@ def calculate_score(hand)
     end
   end
   hand.select {|value| value == 'Ace'}.count.times do 
-    score -= 10 if score > 21
+    score -= 10 if score > WHATEVER_ONE
   end
   
   score
 end
 
 def bust?(score)
-  score > 21
+  score > WHATEVER_ONE
 end
 
 def hit!(deck, hand)
@@ -89,7 +92,7 @@ loop do
   dealer_score = 0
   player_score = 0
   
-  prompt("Welcome to Twenty-one!")
+  prompt("Welcome to #{WHATEVER_ONE}!")
   
   deck = new_deck
   
@@ -125,7 +128,7 @@ loop do
   else
     prompt("The dealer's turn...")
     loop do
-      if dealer_score >= 17 
+      if dealer_score >= DEALER_STAYS_AT 
   prompt("The dealer stays at #{dealer_score}")
     prompt("================")
   
