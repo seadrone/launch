@@ -131,7 +131,6 @@ loop do
     num_dealer_wins += 1
   else
     prompt("The dealer's turn...")
-    sleep(1)
     loop do
       if dealer_score >= DEALER_STAYS_AT
         prompt("The dealer stays at #{dealer_score}")
@@ -141,6 +140,7 @@ loop do
         prompt("The dealer hits")
         hit!(deck, dealer_hand)
         dealer_score = calculate_score(dealer_hand)
+        sleep(1.5)
         prompt("The dealer's hand is now: #{print_hand(dealer_hand, 'show')}. Total: #{dealer_score}")
         prompt("================")
         break if bust?(dealer_score)
