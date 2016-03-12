@@ -163,7 +163,7 @@ loop do
   if num_dealer_wins == NUMBER_TO_WIN
     prompt("The dealer has won the entire game with a final score of #{num_dealer_wins} to #{num_player_wins}")
   elsif num_player_wins == NUMBER_TO_WIN
-    prompt("You've won the entire game with a final of #{num_player_wins} to #{num_dealer_wins}")
+    prompt("You won the entire game with a final score of #{num_player_wins} to #{num_dealer_wins}")
   end
 break unless play_again?
 end
