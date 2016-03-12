@@ -42,7 +42,7 @@ end
 def calculate_score(hand)
   score = 0
   hand.each do |card|
-    if card[0] == 'A'
+    if card[0] == 'Ace'
       score += 11
     elsif card[0].to_i == 0
       score += 10
@@ -75,70 +75,82 @@ def who_won(player_score, dealer_score)
   end
 end
 
-
-dealer_hand = []
-player_hand =[]
-
-dealer_score = 0
-player_score = 0
-
-prompt("Welcome to Twenty-one!")
-
-deck = new_deck
-
-2.times { dealer_hand << deal_card!(deck) }
-2.times { player_hand << deal_card!(deck) }
-
-dealer_score = calculate_score(dealer_hand)
-player_score = calculate_score(player_hand)
-prompt("Dealer's hand: #{print_hand(dealer_hand, 'hide')}.")
-prompt("Your hand: #{print_hand(player_hand, 'show')}. Your total: #{player_score}")
+def play_again?
+  puts("")
+  prompt("Would like to play again? (y or n)")
+  answer = gets.chomp
+  answer.downcase.start_with?('y')
+end
 
 loop do
-  prompt("Hit or stay (h or s)?")
-  answer = gets.chomp
-  if answer == 'h'
-    prompt("You chose to hit")
-    hit!(deck, player_hand)
-    player_score = calculate_score(player_hand)
-    prompt("Your hand is now: #{print_hand(player_hand, 'show')}. Your total: #{player_score}")
-    break if bust?(player_score)
-  elsif answer == 's'
-    prompt("You chose to stay at #{player_score}.")
-    prompt("================")
-    break
-  else
-    prompt("That's not a valid choice. Please choose 'h' to hit or 's' to stay.")
-  end
-end
-
-if bust?(player_score)
-  prompt("You bust! The dealer wins.")
-else
-  prompt("The dealer's turn...")
+  dealer_hand = []
+  player_hand =[]
+  
+  dealer_score = 0
+  player_score = 0
+  
+  prompt("Welcome to Twenty-one!")
+  
+  deck = new_deck
+  
+  2.times { dealer_hand << deal_card!(deck) }
+  2.times { player_hand << deal_card!(deck) }
+  
+  dealer_score = calculate_score(dealer_hand)
+  player_score = calculate_score(player_hand)
+  prompt("Dealer's hand: #{print_hand(dealer_hand, 'hide')}.")
+  prompt("Your hand: #{print_hand(player_hand, 'show')}. Your total: #{player_score}")
+  
   loop do
-    if dealer_score >= 17 || bust?(dealer_score)
-      prompt("The dealer stays at #{dealer_score}")
+    prompt("Hit or stay (h or s)?")
+    answer = gets.chomp
+    if answer == 'h'
+      prompt("You chose to hit")
+      hit!(deck, player_hand)
+      player_score = calculate_score(player_hand)
+      prompt("Your hand is now: #{print_hand(player_hand, 'show')}. Your total: #{player_score}")
+      break if bust?(player_score)
+    elsif answer == 's'
+      prompt("You chose to stay at #{player_score}.")
+      prompt("================")
       break
     else
-      prompt("The dealer hits")
-      hit!(deck, dealer_hand)
-      dealer_score = calculate_score(dealer_hand)
-      prompt("The dealer's hand is now: #{print_hand(dealer_hand, 'show')}. Dealer's total is #{dealer_score}")
-      prompt("================")
-      break if bust?(dealer_score)
+      prompt("That's not a valid choice. Please choose 'h' to hit or 's' to stay.")
     end
   end
-end
-
-if bust?(dealer_score)
-  prompt("Dealer busts! You win.")
-else
-  prompt("================")
-  prompt(who_won(player_score, dealer_score)) unless bust?(dealer_score) || bust?(player_score)
+  
+  if bust?(player_score)
+    prompt("================")
+    prompt("You bust! The dealer wins.")
+  else
+    prompt("The dealer's turn...")
+    loop do
+      if dealer_score >= 17 
+  prompt("The dealer stays at #{dealer_score}")
+    prompt("================")
+  
+        break
+      else
+        prompt("The dealer hits")
+        hit!(deck, dealer_hand)
+        dealer_score = calculate_score(dealer_hand)
+        prompt("The dealer's hand is now: #{print_hand(dealer_hand, 'show')}. Dealer's total is #{dealer_score}")
+        prompt("================")
+        break if bust?(dealer_score)
+      end
+    end
+  end
+  
+  if bust?(dealer_score)
+    prompt("Dealer busts! You win.")
+  else
+    prompt(who_won(player_score, dealer_score)) unless bust?(player_score)
+  end
+  
   prompt("The dealer had: #{print_hand(dealer_hand, 'show')}. Dealer's total: #{dealer_score}")
   prompt("You had: #{print_hand(player_hand, 'show')}. Your total: #{player_score}")
   prompt("================")
+  
+  break unless play_again?
 end
-
-prompt("Thanks for playing Twenty-one!")
+prompt("Thanks for playing Twenty-one! Goodbye!")
