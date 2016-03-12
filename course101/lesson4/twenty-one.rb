@@ -144,13 +144,11 @@ loop do
       if dealer_score >= DEALER_STAYS_AT 
         prompt("The dealer stays at #{dealer_score}")
         prompt("================")
-        sleep(2.0)
         break
       else
         prompt("The dealer hits")
         hit!(deck, dealer_hand)
         dealer_score = calculate_score(dealer_hand)
-        sleep(2.0)
         prompt("The dealer's hand is now: #{print_hand(dealer_hand, 'show')}. Total: #{dealer_score}")
         prompt("================")
         break if bust?(dealer_score)
@@ -160,7 +158,6 @@ loop do
   
   if bust?(dealer_score)
     prompt("Dealer busts! You win.")
-    sleep(2.5)
     num_player_wins += 1
   else
     prompt(who_won(player_score, dealer_score)) unless bust?(player_score)
@@ -169,8 +166,8 @@ loop do
   num_dealer_wins += 1 if who_won(player_score, dealer_score) == 'Dealer wins'
   num_player_wins += 1 if who_won(player_score, dealer_score) == 'You won'
   
-  prompt("The dealer had: #{print_hand(dealer_hand, 'show')}. Dealer's total: #{dealer_score}")
-  prompt("You had: #{print_hand(player_hand, 'show')}. Your total: #{player_score}")
+  prompt("The dealer had: #{print_hand(dealer_hand, 'show')}. Total: #{dealer_score}")
+  prompt("You had: #{print_hand(player_hand, 'show')}. Total: #{player_score}")
   prompt("================")
 
   prompt("Game score: Dealer: #{num_dealer_wins} You: #{num_player_wins}")
