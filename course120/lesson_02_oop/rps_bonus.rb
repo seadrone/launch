@@ -41,10 +41,10 @@ class Player
   end
 
   def set_move_choice(choice)
-    self.move = get_object(choice)
+    self.move = get_move(choice)
   end
 
-  def get_object(choice)
+  def get_move(choice)
     case choice
     when 'rock'
       Rock.new
@@ -89,7 +89,7 @@ class Move
   end
 
   def defeats?(other_move)
-    self.defeats.include?(other_move.to_s)
+    defeats.include?(other_move.to_s)
   end
 
   def to_s
@@ -161,7 +161,7 @@ class Human < Player
       break if Move::VALUES.include? choice
       puts "Sorry, that's not a valid choice."
     end
-    set_move_choice(choice)
+    self.move = set_move_choice(choice)
     self.history << self.move
   end
 end
@@ -169,8 +169,9 @@ end
 class Computer < Player
   def choose(opponent)
     if opponent.history.length < 2
-      self.move = set_move_choice(Move::VALUES.sample)
-      self.history << self.move
+      # self.move = set_move_choice(Move::VALUES.sample)
+      # self.history << self.move
+      move = Move::VALUES.sample
     else
       occurrences = {}
       opponent.history.each do |move|
@@ -184,11 +185,12 @@ class Computer < Player
       smart_sample = []
       highest_occurring_moves = occurrences.select {|k,v| v >= max}.keys
       highest_occurring_moves.each do |move|
-        get_object(move).loses_to.map {|str| smart_sample << str}
+      get_move(move).loses_to.map {|str| smart_sample << str}
       end
-      self.move = set_move_choice(smart_sample.sample)
-      self.history << self.move
+      move = smart_sample.sample
     end
+    self.move = set_move_choice(move)
+    self.history << self.move
   end
 
   def name
@@ -254,20 +256,8 @@ class RPSGame
     @computer = Computer.new
   end
 
-  def titlelize(arr)
-    i = 0
-    title = ""
-    loop do
-      title << arr[i].capitalize << ', '
-      i += 1
-      break if i == arr.length
-    end
-    title.chop.chop
-  end
-
   def display_welcome_message
-    # puts "Hi #{human.name}! Welcome to Rock, Paper, Scissors, Lizard, Spock!"
-    puts "Hi, #{human.name}! Welcome to #{titlelize(Move::VALUES)}!"
+    puts "Hi, #{human.name}! Welcome to " + Move::VALUES.map(&:capitalize).join(', ') + "!"
     puts "The first player to win #{GAMES_TO_WIN} games wins. Good luck."
   end
 
@@ -309,8 +299,7 @@ class RPSGame
       break if ['y', 'n'].include? answer.downcase
       puts "Please enter y or n."
     end
-    return false if answer.downcase == 'n'
-    return true if answer.downcase == 'y'
+    answer.downcase == 'y'
   end
 
   def overall_winner?
@@ -366,14 +355,18 @@ class RPSGame
     end
   end
 
+  def reset_players
+    human.score = 0
+    human.history = []
+    computer.score = 0
+    computer.history = []
+  end
+
   def play
     loop do
       display_welcome_message
       choose_bot
-      human.score = 0
-      computer.score = 0
-      human.history = []
-      computer.history = []
+      reset_players
       board = Scoreboard.new(human, computer)
       loop do
         computer.choose(human)
