@@ -208,11 +208,6 @@ class TTTGame
   end
 
   def someone_won_the_round?
-    # if human.round_winner? || computer.round_winner?
-    #   true
-    # else
-    #   nil
-    # end
     human.round_winner? || computer.round_winner?
   end
 
@@ -233,7 +228,7 @@ class TTTGame
   end
 
   def display_welcome_message
-    puts "Hi #{human.name}! Welcome to Tic Tac Toe!"
+    puts "Welcome to Tic Tac Toe!"
     puts "The computer's name is #{computer.name}."
     puts ""
   end
