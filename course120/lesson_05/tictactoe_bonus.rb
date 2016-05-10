@@ -1,3 +1,4 @@
+require 'pry'
 class Board
   WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
                   [[1, 4, 7], [2, 5, 8], [3, 6, 9]] + # cols
@@ -32,7 +33,7 @@ class Board
   def winning_marker
     WINNING_LINES.each do |line|
       squares = @squares.values_at(*line)
-      if three_identical_markers?(squares)
+      if identical_markers?(squares, 3, nil)
         return squares.first.marker
       end
     end
@@ -41,6 +42,16 @@ class Board
 
   def reset
     (1..9).each { |key| @squares[key] = Square.new }
+  end
+  
+  def find_at_risk_square(marker)
+    WINNING_LINES.each do |line|
+      squares = @squares.values_at(*line)
+      if identical_markers?(squares, 2, marker)
+        return line.find { |i| @squares[i].marker == Square::INITIAL_MARKER }
+      end
+    end
+    nil
   end
   
   # rubocop:disable Metrics/AbcSize
@@ -60,9 +71,15 @@ class Board
   # rubocop:enable Metrics/AbcSize
   
   private
-  def three_identical_markers?(squares)
+  # def three_identical_markers?(squares)
+  #   markers = squares.select(&:marked?).collect(&:marker)
+  #   return false if markers.size != 3
+  #   markers.min == markers.max
+  # end
+  
+  def identical_markers?(squares, num_markers, marker)
     markers = squares.select(&:marked?).collect(&:marker)
-    return false if markers.size != 3
+    return false if markers.size != num_markers
     markers.min == markers.max
   end
 
@@ -102,13 +119,14 @@ class Player
   def round_winner?
     self.score == TTTGame::POINTS_NEEDED_TO_WIN
   end
-  
 end
+
+
+
 
 class TTTGame
   HUMAN_MARKER = "X"
   COMPUTER_MARKER = "O"
-  FIRST_TO_MOVE = HUMAN_MARKER
   POINTS_NEEDED_TO_WIN = 3
 
   attr_reader :board, :human, :computer
@@ -117,41 +135,54 @@ class TTTGame
     @board = Board.new
     @human = Player.new(HUMAN_MARKER)
     @computer = Player.new(COMPUTER_MARKER)
-    @current_marker = FIRST_TO_MOVE
+    # @current_marker = FIRST_TO_MOVE
   end
 
   def play
     clear
     display_welcome_message
+    choose_first_player
 
-loop do
-  
     loop do
-      display_board
-
+      
       loop do
-        current_player_moves
-        break if board.someone_won? || board.full?
-        clear_screen_and_display_board if human_turn?
+        display_board
+  
+        loop do
+          current_player_moves
+          break if board.someone_won? || board.full?
+          clear_screen_and_display_board if human_turn?
+        end
+  
+        display_result_and_keep_score
+        display_score
+        break if someone_won_the_round?
+        break unless play_another_round?
+        reset
+        display_play_again_message
       end
-
-      display_result_and_keep_score
-      display_score
-      break if someone_won_the_round?
-      break unless play_another_round?
-      reset
-      display_play_again_message
+      
+      display_round_winner
+      break unless play_another_game?
+      reset_all
     end
-    
-    display_round_winner
-    break unless play_another_game?
-    reset_all
-end
-    
+        
     display_goodbye_message
+    
   end
 
   private
+  def choose_first_player
+    answer = nil
+    loop do
+      puts "Would you like to go first?"
+      answer = gets.chomp.downcase
+      break if %w(y n).include? answer
+      puts "Sorry, your answer must be y or n."
+    end
+    answer == 'y' ? @current_marker = HUMAN_MARKER : @current_marker = COMPUTER_MARKER
+  end
+  
   def display_round_winner
     if human.score == POINTS_NEEDED_TO_WIN
       puts "Congratulations, you won the game!"
@@ -222,7 +253,15 @@ end
   end
 
   def computer_moves
-    board[board.unmarked_keys.sample] = computer.marker
+    if board.find_at_risk_square(computer.marker)
+      board[board.find_at_risk_square(computer.marker)] = computer.marker
+    elsif board.find_at_risk_square(human.marker)
+      board[board.find_at_risk_square(human.marker)] = computer.marker
+    elsif board.unmarked_keys.include?(5)
+      board[5] = computer.marker
+    else # just pick a random empty square
+      board[board.unmarked_keys.sample] = computer.marker
+    end
   end
 
   def current_player_moves
