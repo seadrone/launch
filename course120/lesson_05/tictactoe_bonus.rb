@@ -150,7 +150,7 @@ class Computer < Player
 end
 
 class TTTGame
-  POINTS_NEEDED_TO_WIN = 5
+  POINTS_NEEDED_TO_WIN = 1
 
   attr_reader :board, :human, :computer
 
@@ -160,27 +160,36 @@ class TTTGame
     @computer = Computer.new
   end
 
+  def play_round
+    loop do
+      current_player_moves
+      break if board.someone_won? || board.full?
+      clear_screen_and_display_board if human_turn?
+    end
+  end
+
+  def play_round_and_displays
+    loop do
+      display_board
+      play_round
+      display_result_and_keep_score
+      display_score
+      break if someone_won_the_round?
+      break unless play_another_round?
+      reset
+      display_play_again_message
+    end
+  end
+
   def play
     clear
     display_welcome_message
     choose_first_player
     loop do
-      loop do
-        display_board
-        loop do
-          current_player_moves
-          break if board.someone_won? || board.full?
-          clear_screen_and_display_board if human_turn?
-        end
-        display_result_and_keep_score
-        display_score
-        break if someone_won_the_round?
-        break unless play_another_round?
-        reset
-        display_play_again_message
-      end
+      play_round_and_displays
       display_round_winner
       break unless play_another_game?
+      choose_first_player
       reset_all
     end
     display_goodbye_message
@@ -272,7 +281,7 @@ class TTTGame
       board[board.find_at_risk_square(human.marker)] = computer.marker
     elsif board.unmarked_keys.include?(5)
       board[5] = computer.marker
-    else # just pick a random empty square
+    else
       board[board.unmarked_keys.sample] = computer.marker
     end
   end
