@@ -30,30 +30,30 @@ class Board
     !!winning_marker
   end
 
-  def winning_marker
-    WINNING_LINES.each do |line|
-      squares = @squares.values_at(*line)
-      if identical_markers?(squares, 3, nil)
-        return squares.first.marker
+    def winning_marker
+      WINNING_LINES.each do |line|
+        squares = @squares.values_at(*line)
+        if identical_markers?(squares, 3)
+          return squares.first.marker
+        end
       end
+      nil
     end
-    nil
-  end
-
-  def reset
-    (1..9).each { |key| @squares[key] = Square.new }
-  end
   
-  def find_at_risk_square(marker)
-    WINNING_LINES.each do |line|
-      squares = @squares.values_at(*line)
-      if identical_markers?(squares, 2, marker)
-        return line.find { |i| @squares[i].marker == Square::INITIAL_MARKER }
+    def reset
+      (1..9).each { |key| @squares[key] = Square.new }
+    end
+    
+    def find_at_risk_square(marker)
+      WINNING_LINES.each do |line|
+        squares = @squares.values_at(*line)
+        if identical_markers?(squares, 2)
+          return line.find { |i| @squares[i].marker == Square::INITIAL_MARKER }
+        end
       end
+      nil
     end
-    nil
-  end
-  
+    
   # rubocop:disable Metrics/AbcSize
   def draw
     puts "     |     |"
@@ -72,11 +72,17 @@ class Board
   
   private
 
-  def identical_markers?(squares, num_markers, marker)
+  def identical_markers?(squares, num_markers)
     markers = squares.select(&:marked?).collect(&:marker)
     return false if markers.size != num_markers
     markers.min == markers.max
   end
+
+  # def three_identical_markers?(squares)
+  #   markers = squares.select(&:marked?).collect(&:marker)
+  #   return false if markers.size != 3
+  #   markers.min == markers.max
+  # end
 end
 
 class Square
@@ -135,7 +141,7 @@ class Human < Player
       marker = gets.chomp
       break unless marker.empty?
     end
-    self.marker = marker.length > 1 ? marker[0] : marker
+    self.marker = marker[0]
   end
 end
 
@@ -150,47 +156,41 @@ class Computer < Player
 end
 
 class TTTGame
-  POINTS_NEEDED_TO_WIN = 1
+  POINTS_NEEDED_TO_WIN = 5
 
   attr_reader :board, :human, :computer
 
   def initialize
     @board = Board.new
-    @human = Human.new
+    # @human = Human.new
     @computer = Computer.new
-  end
-
-  def play_round
-    loop do
-      current_player_moves
-      break if board.someone_won? || board.full?
-      clear_screen_and_display_board if human_turn?
-    end
-  end
-
-  def play_round_and_displays
-    loop do
-      display_board
-      play_round
-      display_result_and_keep_score
-      display_score
-      break if someone_won_the_round?
-      break unless play_another_round?
-      reset
-      display_play_again_message
-    end
   end
 
   def play
     clear
     display_welcome_message
+    @human = Human.new
     choose_first_player
     loop do
-      play_round_and_displays
+      loop do
+        display_board
+        loop do
+          current_player_moves
+          break if board.someone_won? || board.full?
+          clear_screen_and_display_board if human_turn?
+        end
+        clear_screen_and_display_board
+        display_result_and_keep_score
+        display_score
+        break if someone_won_the_round?
+        break unless play_another_round?
+        reset
+        display_play_again_message
+      end
       display_round_winner
       break unless play_another_game?
-      choose_first_player
       reset_all
+      choose_first_player
     end
     display_goodbye_message
   end
@@ -209,9 +209,10 @@ class TTTGame
   end
   
   def display_round_winner
-    if human.score == POINTS_NEEDED_TO_WIN
+    puts ""
+    if human.round_winner?
       puts "Congratulations, you won the game!"
-    elsif computer.score == POINTS_NEEDED_TO_WIN
+    elsif computer.round_winner?
       puts "The computer wins this time!"
     end
   end
@@ -297,18 +298,20 @@ class TTTGame
   end
 
   def display_result_and_keep_score
-    clear_screen_and_display_board
-
     case board.winning_marker
     when human.marker
-      human.score += 1
+      increment_score(human)
       puts "You won!"
     when computer.marker
-      computer.score += 1
+      increment_score(computer)
       puts "#{computer.name} won!"
     else
       puts "It's a tie!"
     end
+  end
+  
+  def increment_score(who)
+    who.score += 1
   end
 
   def play_another_round?
