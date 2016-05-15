@@ -9,13 +9,13 @@ class Participant
 
   def total
     total = 0
+    num_aces = hand.select(&:ace?).count
     hand.each do |card|
       total += card.value
     end
 
-    # adjust for Aces
-    if total >= 21
-      hand.select(&:ace?).count.times do
+    if total > 21 || num_aces > 1
+      (num_aces - 1).times do
         total -= 10
       end
     end
@@ -46,7 +46,7 @@ class Player < Participant
     name = nil
     loop do
       puts "What's your name?"
-      name = gets.chomp
+      name = gets.chomp.strip
       break unless name.empty?
       puts "Your name cannot be blank."
     end
@@ -55,7 +55,7 @@ class Player < Participant
 end
 
 class Dealer < Participant
-  NAMES = %w(C3PO R2D2 BB-8)
+  NAMES = %w(C3PO R2D2 BB-8).freeze
   def set_name
     self.name = NAMES.sample
   end
@@ -69,7 +69,7 @@ class Dealer < Participant
 end
 
 class Deck
-  attr_accessor :cards
+  attr_reader :cards
   def initialize
     @cards = []
     Card::SUITS.each do |suit|
@@ -90,8 +90,9 @@ class Deck
 end
 
 class Card
-  SUITS = %w(H D C S)
-  RANKS = %w(2 3 4 5 6 7 8 9 10 Jack Queen King Ace)
+  SUITS = %w(H D C S).freeze
+  RANKS = %w(2 3 4 5 6 7 8 9 10 Jack Queen King Ace).freeze
+
   attr_reader :rank
   
   def initialize(rank, suit)
@@ -134,8 +135,7 @@ end
 
 class TwentyOne
   NUM_TO_WIN = 3
-  attr_accessor :player, :dealer, :deck
-
+  attr_reader :player, :dealer, :deck
   def initialize
     puts "Welcome to Twenty-One!"
     puts "The first player to win #{NUM_TO_WIN} hands wins."
@@ -146,24 +146,21 @@ class TwentyOne
 
   def start
     loop do
-      #play NUM_TO_WIN rounds
       loop do
         system 'clear'
         deal_initial
         show_initial_hands
 
         player_turn
-        dealer_turn if !player.bust?
+        dealer_turn unless player.bust?
 
-        bust_message
-        show_hand_winner
-        increment_score
+        show_hand_winner_and_keep_score
         show_score
         break if player.wins == NUM_TO_WIN || dealer.wins == NUM_TO_WIN
-        play_another_hand? ? reset : break
+        play_again?('hand') ? reset : break
       end
       
-      play_another_game? ? reset_game : break
+      play_again?('round') ? reset_game : break
     end
 
     puts "Thanks for playing Twenty-One! Goodbye."
@@ -171,30 +168,21 @@ class TwentyOne
 
   private
 
-  def play_another_hand?
+  def play_again?(hand_or_game)
     answer = nil
+    message = ''
+    message = hand_or_game == 'hand' ? 'hand' : "#{NUM_TO_WIN}-hand game"
     loop do
-      puts "Would you like to play another hand (y/n)?"
-      answer = gets.chomp
+      puts "Would you like to play another " + message + " (y/n)?"
+      answer = gets.chomp.downcase.strip
       break if %w(y n).include? answer
       puts "Please enter 'y' or 'n'"
     end
-    answer == 'y'
-  end
-
-  def play_another_game?
-    answer = nil
-    loop do
-      puts "Would you like to play another #{NUM_TO_WIN}-hand game?"
-      answer = gets.chomp.downcase
-      break if %w(y n).include? answer
-      puts "Please enter 'y' or 'n'"
-    end
-    answer == 'y'
+    answer == 'y'   
   end
 
   def reset
-    self.deck = Deck.new
+    deck = Deck.new
     player.hand = []
     dealer.hand = []
   end
@@ -223,22 +211,22 @@ class TwentyOne
       puts "Would you like to hit or stay? (h/s)"
       answer = nil
       loop do
-        answer = gets.chomp.downcase
+        answer = gets.chomp.downcase.strip
         break if ['h', 's'].include? answer
         puts "Please enter 'h' to hit and 's' to stay."
       end
+      process_player_response(answer)
+      break if player.bust? || answer == 's'
+    end
+  end
 
-      if answer == 's'
-        puts "#{player.name} chose stay..."
-        break
-      elsif player.bust?
-        break
-      elsif answer == 'h'
-        player.receive_card(deck.deal_single)
-        puts "#{player.name} chose hit..."
-        player.show_hand
-        break if player.bust?
-      end
+  def process_player_response(answer)
+    if answer == 's'
+      puts "#{player.name} chose stay..."
+    elsif answer == 'h'
+      player.receive_card(deck.deal_single)
+      puts "#{player.name} chose hit..."
+      player.show_hand
     end
   end
 
@@ -246,52 +234,51 @@ class TwentyOne
     puts ""
     puts "#{dealer.name}'s turn:"
     loop do
-      if dealer.total < 17
-        puts "#{dealer.name} chose hit..."
-        dealer.receive_card(deck.deal_single)
-        dealer.show_hand if !dealer.bust?
-      elsif dealer.bust?
-        dealer.show_hand
-        break
-      elsif dealer.total >= 17 && !dealer.bust? 
-        puts "#{dealer.name} chose stay..."
-        dealer.show_hand
-        break
-      end
+      process_dealer_turn
+      break unless process_dealer_turn
     end
   end
-
-  def bust_message
+  
+  def process_dealer_turn
+    if dealer.total < 17
+      puts "#{dealer.name} chose hit..."
+      dealer.receive_card(deck.deal_single)
+      dealer.show_hand unless dealer.bust?
+    elsif dealer.bust?
+      dealer.show_hand
+      nil
+    else
+      puts "#{dealer.name} chose stay..."
+      dealer.show_hand
+      nil
+    end    
+  end
+  
+  def calculate_winner
+    if !player.bust? && player.total > dealer.total
+      player
+    elsif !dealer.bust? && dealer.total > player.total
+      dealer
+    elsif dealer.total == player.total
+      nil
+    end
+  end
+  
+  def show_hand_winner_and_increment_score
     if player.bust?
+      dealer.wins += 1
       puts "You busted! #{dealer.name} wins!"
     elsif dealer.bust?
+      player.wins += 1
       puts "#{dealer.name} busts! You win!"
-    end
-  end
-
-  def show_hand_winner
-    if !player.bust? && player.total > dealer.total
-      puts "You won!"
-    elsif !dealer.bust? && dealer.total > player.total
-      puts "The dealer won this round."
-    elsif dealer.total == player.total
+    elsif calculate_winner == player
+      player.wins += 1
+      puts "You win!"
+    elsif calculate_winner == dealer
+      dealer.wins += 1
+      puts "#{dealer.name} wins!"
+    elsif !calculate_winner
       puts "It's a tie!"
-    end
-  end
-
-  def show_game_winner
-
-  end
-
-  def increment_score
-    if !player.bust? && player.total > dealer.total
-      player.wins += 1
-    elsif !dealer.bust? && dealer.total > player.total
-      dealer.wins += 1
-    elsif player.bust?
-      dealer.wins += 1
-    elsif dealer.bust?
-      player.wins += 1
     end
   end
 
