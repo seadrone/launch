@@ -1,9 +1,10 @@
 require 'pry'
 class Participant
-  attr_accessor :name, :hand
+  attr_accessor :name, :hand, :wins
   def initialize
     set_name
     @hand = []
+    @wins = 0
   end
 
   def total
@@ -132,9 +133,12 @@ class Card
 end
 
 class TwentyOne
+  NUM_TO_WIN = 3
   attr_accessor :player, :dealer, :deck
 
   def initialize
+    puts "Welcome to Twenty-One!"
+    puts "The first player to win #{NUM_TO_WIN} hands wins."
     @player = Player.new
     @dealer = Dealer.new
     @deck = Deck.new
@@ -142,36 +146,24 @@ class TwentyOne
 
   def start
     loop do
-      system 'clear'
-      deal_initial
-      show_initial_hands
-      player_turn
-      if player.bust?
-        bust_message
-        if play_again?
-          reset
-          next # skip rest of code and go to next loop iteration
-        else
-          break
-        end
-      end
+      #play NUM_TO_WIN rounds
+      loop do
+        system 'clear'
+        deal_initial
+        show_initial_hands
 
-      dealer_turn
-      if dealer.bust?
+        player_turn
+        dealer_turn if !player.bust?
+
         bust_message
-        if play_again?
-          reset
-          next
-        else
-          break
-        end
+        show_hand_winner
+        increment_score
+        show_score
+        break if player.wins == NUM_TO_WIN || dealer.wins == NUM_TO_WIN
+        play_another_hand? ? reset : break
       end
-      show_winner
-      if play_again?
-        reset
-      else
-        break
-      end
+      
+      play_another_game? ? reset_game : break
     end
 
     puts "Thanks for playing Twenty-One! Goodbye."
@@ -179,11 +171,22 @@ class TwentyOne
 
   private
 
-  def play_again?
+  def play_another_hand?
     answer = nil
     loop do
-      puts "Would you like to play again (y/n)?"
+      puts "Would you like to play another hand (y/n)?"
       answer = gets.chomp
+      break if %w(y n).include? answer
+      puts "Please enter 'y' or 'n'"
+    end
+    answer == 'y'
+  end
+
+  def play_another_game?
+    answer = nil
+    loop do
+      puts "Would you like to play another #{NUM_TO_WIN}-hand game?"
+      answer = gets.chomp.downcase
       break if %w(y n).include? answer
       puts "Please enter 'y' or 'n'"
     end
@@ -194,6 +197,12 @@ class TwentyOne
     self.deck = Deck.new
     player.hand = []
     dealer.hand = []
+  end
+
+  def reset_game
+    reset
+    player.wins = 0
+    dealer.wins = 0
   end
 
   def deal_initial
@@ -211,40 +220,41 @@ class TwentyOne
   def player_turn
     puts "#{player.name}'s turn:"
     loop do
+      puts "Would you like to hit or stay? (h/s)"
       answer = nil
       loop do
-        puts "Would you like to hit or stay? (h/s)"
         answer = gets.chomp.downcase
-        break if %w(h s).include? answer
+        break if ['h', 's'].include? answer
         puts "Please enter 'h' to hit and 's' to stay."
       end
 
       if answer == 's'
-        puts "You chose stay."
+        puts "#{player.name} chose stay..."
         break
-      elsif answer == 'h'
-        puts "You hit..."
-        player.receive_card(deck.deal_single)
-        player.show_hand
-        break if player.bust?
       elsif player.bust?
         break
+      elsif answer == 'h'
+        player.receive_card(deck.deal_single)
+        puts "#{player.name} chose hit..."
+        player.show_hand
+        break if player.bust?
       end
     end
   end
 
   def dealer_turn
+    puts ""
     puts "#{dealer.name}'s turn:"
     loop do
       if dealer.total < 17
-        puts "#{dealer.name} hits..."
+        puts "#{dealer.name} chose hit..."
         dealer.receive_card(deck.deal_single)
         dealer.show_hand if !dealer.bust?
       elsif dealer.bust?
         dealer.show_hand
         break
       elsif dealer.total >= 17 && !dealer.bust? 
-        puts "#{dealer.name} stays."
+        puts "#{dealer.name} chose stay..."
         dealer.show_hand
         break
       end
@@ -253,21 +263,42 @@ class TwentyOne
 
   def bust_message
     if player.bust?
-      puts "You busted! #{dealer.name} wins the game!"
+      puts "You busted! #{dealer.name} wins!"
     elsif dealer.bust?
-      puts "#{dealer.name} busts! You win the game!"
+      puts "#{dealer.name} busts! You win!"
     end
   end
 
-  def show_winner
-    if player.total < 22 && player.total > dealer.total
-      puts "Congratulations! #{player.name} wins!"
-    elsif dealer.total < 22 && dealer.total > player.total
-      puts "The dealer won this time."
-    else
+  def show_hand_winner
+    if !player.bust? && player.total > dealer.total
+      puts "You won!"
+    elsif !dealer.bust? && dealer.total > player.total
+      puts "The dealer won this round."
+    elsif dealer.total == player.total
       puts "It's a tie!"
     end
   end
+
+  def show_game_winner
+
+  end
+
+  def increment_score
+    if !player.bust? && player.total > dealer.total
+      player.wins += 1
+    elsif !dealer.bust? && dealer.total > player.total
+      dealer.wins += 1
+    elsif player.bust?
+      dealer.wins += 1
+    elsif dealer.bust?
+      player.wins += 1
+    end
+  end
+
+  def show_score
+    puts "Score: #{player.name}: #{player.wins}  #{dealer.name}: #{dealer.wins}"
+  end
+
 end
 
 game = TwentyOne.new
