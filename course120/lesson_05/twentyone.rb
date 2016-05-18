@@ -14,10 +14,9 @@ class Participant
       total += card.value
     end
 
-    if total > 21 || num_aces > 1
-      (num_aces - 1).times do
-        total -= 10
-      end
+    while total > 21 && num_aces > 0
+      total -= 10
+      num_aces -= 1
     end
     total
   end
