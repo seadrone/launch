@@ -262,26 +262,33 @@ class TwentyOne
   end
   
   def show_hand_winner_and_increment_score
-    player_bust = player.bust?
-    dealer_bust = dealer.bust?
-    winner = calculate_winner
-    
-    if player_bust
-      dealer.wins += 1
-      puts "You busted! #{dealer.name} wins!"
-    elsif dealer_bust
-      player.wins += 1
-      puts "#{dealer.name} busts! You win!"
-    elsif winner == player
-      player.wins += 1
-      puts "You win!"
-    elsif winner == dealer
-      dealer.wins += 1
-      puts "#{dealer.name} wins!"
-    elsif !winner
+    if player.bust? || dealer.bust?
+      process_busts
+    elsif calculate_winner
+      process_wins
+    else
       puts "It's a tie!"
     end
-    
+  end
+
+  def process_wins
+    if calculate_winner == player
+      player.wins += 1
+      puts "You win!"
+    else
+      dealer.wins += 1
+      puts "#{dealer.name} wins!"
+    end
+  end
+
+  def process_busts
+    if player.bust?
+      dealer.wins += 1
+      puts "You busted! #{dealer.name} wins!"
+    elsif dealer.bust?
+      player.wins += 1
+      puts "#{dealer.name} busts! You win!"
+    end
   end
 
   def show_score
