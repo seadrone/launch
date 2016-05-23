@@ -87,7 +87,17 @@ class TodoList
     @todos.each do |todo|
       yield(todo)
     end
+    self
   end
+  
+  def select
+    result = TodoList.new('select')
+    each do |todo|
+      result << todo if yield(todo)
+    end
+    result
+  end
+
 end
 
 todo1 = Todo.new("Buy milk")
@@ -95,21 +105,13 @@ todo2 = Todo.new("Clean room")
 todo3 = Todo.new("Go to gym")
 
 list = TodoList.new("Today's Todos")
-list.add(todo1)
-list.add(todo2)
-list.add(todo3)
+list << todo1
+list << todo2
+list << todo3
 
-# puts list
-
-# list.pop
-
-# puts list
-
-# list.mark_done_at(1)
-
-# puts list
+# results = list.select { |todo| todo.done? }
+# puts results.inspect
 
 list.each do |todo|
-  todo.done!
   puts todo
 end

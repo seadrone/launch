@@ -1,11 +1,12 @@
-def select
+def select(array)
   counter = 0
-  arr = []
+  result = []
   while counter < array.size
-    arr << yield(arr[counter]) if yield(arr[counter])
+    current_element = array[counter]
+    result << current_element if yield(current_element)
     counter += 1
   end
-  puts arr if arr
+  result
 end
 
 array = [1, 2, 3, 4, 5]
