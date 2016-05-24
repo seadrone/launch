@@ -98,20 +98,58 @@ class TodoList
     result
   end
 
-end
+  def find_by_title(title)
+    select {|todo| todo.title == title}.first
+  end
+  
+  def all_done
+    result = TodoList.new('all_done')
+    each do |todo|
+      result << todo if todo.done?
+    end
+    result
+  end
+
+  def all_not_done
+    result = TodoList.new('all_not_done')
+    each do |todo|
+      result << todo unless todo.done?
+    end
+    result
+  end
+
+  def mark_done(title)
+    find_by_title(title).done!
+  end
+
+  def mark_undone(title)
+    find_by_title(title).undone!
+  end
+
+  def mark_all_done
+    each do |todo|
+      mark_done(todo.title)
+    end
+  end
+  
+  def mark_all_undone
+    each do |todo|
+      mark_undone(todo.title)
+    end
+  end
+
+end # end TodoList class
 
 todo1 = Todo.new("Buy milk")
 todo2 = Todo.new("Clean room")
 todo3 = Todo.new("Go to gym")
+todo4 = Todo.new("Buy cheese")
 
 list = TodoList.new("Today's Todos")
 list << todo1
 list << todo2
 list << todo3
+list << todo4
 
-# results = list.select { |todo| todo.done? }
-# puts results.inspect
-
-list.each do |todo|
-  puts todo
-end
+list.mark_all_undone
+puts list.all_not_done
