@@ -1,6 +1,8 @@
+require 'simplecov'
 require 'minitest/autorun'
 require 'minitest/reporters'
 
+SimpleCov.start
 Minitest::Reporters.use!
 
 require_relative 'todolist'
@@ -101,5 +103,56 @@ class TodoListTest < MiniTest::Test
     assert_equal(@todo2, @list.item_at(0))
     assert_equal(@todo3, @list.item_at(1))
     # assert_equal([@todo2, @todo3], @list.to_a)
+  end
+  
+  def test_to_s
+    output = <<-OUTPUT.chomp.gsub /^\s+/,""
+    ---- Today's Todos ----
+    [ ] Buy milk
+    [ ] Clean room
+    [ ] Go to the gym
+    OUTPUT
+    
+    assert_equal(output, @list.to_s)
+  end
+  
+  def test_to_s_done
+    @todo3.done!
+    output = <<-OUTPUT.chomp.gsub /^\s+/,""
+    ---- Today's Todos ----
+    [ ] Buy milk
+    [ ] Clean room
+    [X] Go to the gym
+    OUTPUT
+    assert_equal(output, @list.to_s)
+  end
+  
+  def test_to_s_all_done
+    output = <<-OUTPUT.chomp.gsub /^\s+/,""
+    ---- Today's Todos ----
+    [X] Buy milk
+    [X] Clean room
+    [X] Go to the gym
+    OUTPUT
+    @list.done!
+    assert_equal(output, @list.to_s)
+  end
+  
+  def test_each
+    result = []
+    @list.each {|todo| result << todo}
+    assert_equal([@todo1, @todo2, @todo3],result)
+  end
+  
+  def test_each2
+    assert_equal(@list, @list.each {|todo| nil })
+  end
+  
+  def test_select
+    @todo1.done!
+    new_list = TodoList.new(@list.title)
+    new_list.add(@todo1)
+    assert_equal(new_list.title, @list.title)
+    assert_equal(new_list.to_s, @list.select {|todo| todo.done?}.to_s)
   end
 end
